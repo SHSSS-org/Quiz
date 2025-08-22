@@ -1,1 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROG Academy - Interactive Quiz Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --rog-red: #ff0028;
+            --dark-bg: #0c0c0c;
+            --darker-bg: #050505;
+            --medium-bg: #151515;
+            --light-bg: #1f1f1f;
+            --text-color: #e0e0e0;
+            --highlight: #ff3c4e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255, 0, 40, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 85% 30%, rgba(255, 0, 40, 0.1) 0%, transparent 20%),
+                linear-gradient(to bottom, var(--darker-bg) 0%, var(--dark-bg) 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 0, 40, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-text {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--rog-red);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255, 0, 40, 0.5);
+            margin-right: 10px;
+        }
+        
+        .logo-subtext {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .selection-panel {
+            background: rgba(15, 15, 15, 0.8);
+            border: 1px solid rgba(255, 0, 40, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            color: var(--rog-red);
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .class-selector {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+        }
+        
+        .class-btn {
+            background: var(--medium-bg);
+            color: var(--text-color);
+            border: 1px solid var(--rog-red);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .class-btn.active {
+            background: var(--rog-red);
+            color: black;
+            font-weight: bold;
+            box-shadow: 0 0 10px var(--rog-red);
+        }
+        
+        .subject-list, .chapter-list {
+            list-style: none;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .subject-list li, .chapter-list li {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: var(--medium-bg);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .subject-list li:hover, .chapter-list li:hover {
+            background: var(--light-bg);
+            border-left: 3px solid var(--rog-red);
+        }
+        
+        .subject-list li.active, .chapter-list li.active {
+            background: var(--light-bg);
+            border-left: 3px solid var(--rog-red);
+            color: var(--rog-red);
+        }
+        
+        .quiz-container {
+            background: rgba(15, 15, 15, 0.8);
+            border: 1px solid rgba(255, 0, 40, 0.2);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 0, 40, 0.2);
+        }
+        
+        .quiz-title {
+            font-size: 1.8rem;
+            color: var(--rog-red);
+        }
+        
+        .quiz-info {
+            font-size: 1.1rem;
+            color: var(--text-color);
+        }
+        
+        .question-container {
+            margin-bottom: 25px;
+        }
+        
+        .question-text {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .option {
+            padding: 15px;
+            background: var(--medium-bg);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        
+        .option:hover {
+            background: var(--light-bg);
+            border: 1px solid var(--rog-red);
+        }
+        
+        .option.selected {
+            background: rgba(255, 0, 40, 0.2);
+            border: 1px solid var(--rog-red);
+        }
+        
+        .quiz-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .control-btn {
+            background: var(--medium-bg);
+            color: var(--text-color);
+            border: 1px solid var(--rog-red);
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn:hover {
+            background: var(--rog-red);
+            color: black;
+            box-shadow: 0 0 10px var(--rog-red);
+        }
+        
+        .answer-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: var(--medium-bg);
+            border-radius: 8px;
+            border-left: 3px solid var(--rog-red);
+            display: none;
+        }
+        
+        .answer-title {
+            color: var(--rog-red);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .answer-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .logo-text {
+                font-size: 2rem;
+            }
+            
+            .logo-subtext {
+                font-size: 1rem;
+            }
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 40, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 0, 40, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 40, 0); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-text">ROG</div>
+                <div class="logo-subtext">ACADEMY</div>
+            </div>
+            <div class="header-info">
+                <i class="fas fa-user"></i> Student Portal
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="selection-panel">
+                <h2 class="panel-title">Select Your Materials</h2>
+                
+                <div class="class-selector">
+                    <div class="class-btn active">Class 11</div>
+                    <div class="class-btn">Class 12</div>
+                </div>
+                
+                <h3>Subjects</h3>
+                <ul class="subject-list">
+                    <li class="active">Physics</li>
+                    <li>Chemistry</li>
+                    <li>Mathematics</li>
+                    <li>Biology</li>
+                    <li>Computer Science</li>
+                </ul>
+                
+                <h3>Chapters</h3>
+                <ul class="chapter-list">
+                    <li class="active">1. Physical World and Measurement</li>
+                    <li>2. Kinematics</li>
+                    <li>3. Laws of Motion</li>
+                    <li>4. Work, Energy and Power</li>
+                    <li>5. Motion of System of Particles</li>
+                    <li>6. Gravitation</li>
+                </ul>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-header">
+                    <div class="quiz-title">Chapter Quiz</div>
+                    <div class="quiz-info">Question <span id="current-question">1</span> of <span id="total-questions">5</span></div>
+                </div>
+                
+                <div class="question-container">
+                    <div class="question-text">
+                        Which of the following is the standard unit of measurement for energy in the International System of Units (SI)?
+                    </div>
+                    
+                    <div class="options-container">
+                        <div class="option">Newton</div>
+                        <div class="option selected">Joule</div>
+                        <div class="option">Watt</div>
+                        <div class="option">Pascal</div>
+                    </div>
+                </div>
+                
+                <div class="answer-container">
+                    <div class="answer-title">Correct Answer:</div>
+                    <div class="answer-text">Joule. The joule (J) is the derived unit of energy in the International System of Units. It is equal to the energy transferred to an object when a force of one newton acts on that object in the direction of the force through a distance of one meter.</div>
+                </div>
+                
+                <div class="quiz-controls">
+                    <div class="control-btn"><i class="fas fa-arrow-left"></i> Previous</div>
+                    <div class="control-btn pulse" id="show-answer-btn">Show Answer <i class="fas fa-lightbulb"></i></div>
+                    <div class="control-btn">Next <i class="fas fa-arrow-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>ROG Academy &copy; 2023 | Interactive Learning Platform for Class 11 & 12</p>
+        </div>
+    </div>
 
+    <script>
+        // Sample JSON structure for a chapter
+        const sampleChapter = {
+            "chapter": "Physical World and Measurement",
+            "subject": "Physics",
+            "class": "11",
+            "questions": [
+                {
+                    "id": 1,
+                    "question": "Which of the following is the standard unit of measurement for energy in the International System of Units (SI)?",
+                    "options": ["Newton", "Joule", "Watt", "Pascal"],
+                    "correctAnswer": "Joule",
+                    "explanation": "The joule (J) is the derived unit of energy in the International System of Units. It is equal to the energy transferred to an object when a force of one newton acts on that object in the direction of the force through a distance of one meter."
+                },
+                {
+                    "id": 2,
+                    "question": "What is the SI unit of electric current?",
+                    "options": ["Volt", "Ampere", "Ohm", "Coulomb"],
+                    "correctAnswer": "Ampere",
+                    "explanation": "The ampere is the SI unit of electric current. It is defined by taking the fixed numerical value of the elementary charge e to be 1.602176634 × 10^{-19} when expressed in the unit C."
+                },
+                {
+                    "id": 3,
+                    "question": "Which instrument is used to measure atmospheric pressure?",
+                    "options": ["Barometer", "Thermometer", "Hygrometer", "Anemometer"],
+                    "correctAnswer": "Barometer",
+                    "explanation": "A barometer is a scientific instrument used to measure atmospheric pressure. Evangelista Torricelli invented the first barometer in 1643."
+                }
+            ]
+        };
+
+        // DOM elements
+        const showAnswerBtn = document.getElementById('show-answer-btn');
+        const answerContainer = document.querySelector('.answer-container');
+        const options = document.querySelectorAll('.option');
+        
+        // Event listeners
+        showAnswerBtn.addEventListener('click', function() {
+            answerContainer.style.display = answerContainer.style.display === 'block' ? 'none' : 'block';
+            this.classList.toggle('pulse');
+        });
+        
+        options.forEach(option => {
+            option.addEventListener('click', function() {
+                options.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+        
+        // Simulate loading from JSON (in a real application, this would be fetched from the server)
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Sample Chapter JSON:', sampleChapter);
+            // In a real app, we would load the questions from the selected chapter JSON file
+        });
+    </script>
+</body>
+</html>
