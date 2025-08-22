@@ -233,6 +233,17 @@
             box-shadow: 0 0 10px var(--rog-red);
         }
         
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .control-btn:disabled:hover {
+            background: var(--medium-bg);
+            color: var(--text-color);
+            box-shadow: none;
+        }
+        
         .answer-container {
             margin-top: 25px;
             padding: 20px;
@@ -286,6 +297,16 @@
         .pulse {
             animation: pulse 2s infinite;
         }
+        
+        .correct {
+            background: rgba(0, 255, 0, 0.2) !important;
+            border: 1px solid green !important;
+        }
+        
+        .incorrect {
+            background: rgba(255, 0, 0, 0.2) !important;
+            border: 1px solid darkred !important;
+        }
     </style>
 </head>
 <body>
@@ -305,27 +326,27 @@
                 <h2 class="panel-title">Select Your Materials</h2>
                 
                 <div class="class-selector">
-                    <div class="class-btn active">Class 11</div>
-                    <div class="class-btn">Class 12</div>
+                    <div class="class-btn active" data-class="11">Class 11</div>
+                    <div class="class-btn" data-class="12">Class 12</div>
                 </div>
                 
                 <h3>Subjects</h3>
                 <ul class="subject-list">
-                    <li class="active">Physics</li>
-                    <li>Chemistry</li>
-                    <li>Mathematics</li>
-                    <li>Biology</li>
-                    <li>Computer Science</li>
+                    <li class="active" data-subject="physics">Physics</li>
+                    <li data-subject="chemistry">Chemistry</li>
+                    <li data-subject="mathematics">Mathematics</li>
+                    <li data-subject="biology">Biology</li>
+                    <li data-subject="computer-science">Computer Science</li>
                 </ul>
                 
                 <h3>Chapters</h3>
                 <ul class="chapter-list">
-                    <li class="active">1. Physical World and Measurement</li>
-                    <li>2. Kinematics</li>
-                    <li>3. Laws of Motion</li>
-                    <li>4. Work, Energy and Power</li>
-                    <li>5. Motion of System of Particles</li>
-                    <li>6. Gravitation</li>
+                    <li class="active" data-chapter="physical-world">1. Physical World and Measurement</li>
+                    <li data-chapter="kinematics">2. Kinematics</li>
+                    <li data-chapter="laws-of-motion">3. Laws of Motion</li>
+                    <li data-chapter="work-energy">4. Work, Energy and Power</li>
+                    <li data-chapter="particles">5. Motion of System of Particles</li>
+                    <li data-chapter="gravitation">6. Gravitation</li>
                 </ul>
             </div>
             
@@ -336,27 +357,27 @@
                 </div>
                 
                 <div class="question-container">
-                    <div class="question-text">
+                    <div class="question-text" id="question-text">
                         Which of the following is the standard unit of measurement for energy in the International System of Units (SI)?
                     </div>
                     
-                    <div class="options-container">
-                        <div class="option">Newton</div>
-                        <div class="option selected">Joule</div>
-                        <div class="option">Watt</div>
-                        <div class="option">Pascal</div>
+                    <div class="options-container" id="options-container">
+                        <div class="option" data-value="Newton">Newton</div>
+                        <div class="option" data-value="Joule">Joule</div>
+                        <div class="option" data-value="Watt">Watt</div>
+                        <div class="option" data-value="Pascal">Pascal</div>
                     </div>
                 </div>
                 
-                <div class="answer-container">
+                <div class="answer-container" id="answer-container">
                     <div class="answer-title">Correct Answer:</div>
-                    <div class="answer-text">Joule. The joule (J) is the derived unit of energy in the International System of Units. It is equal to the energy transferred to an object when a force of one newton acts on that object in the direction of the force through a distance of one meter.</div>
+                    <div class="answer-text" id="answer-text">Joule. The joule (J) is the derived unit of energy in the International System of Units. It is equal to the energy transferred to an object when a force of one newton acts on that object in the direction of the force through a distance of one meter.</div>
                 </div>
                 
                 <div class="quiz-controls">
-                    <div class="control-btn"><i class="fas fa-arrow-left"></i> Previous</div>
-                    <div class="control-btn pulse" id="show-answer-btn">Show Answer <i class="fas fa-lightbulb"></i></div>
-                    <div class="control-btn">Next <i class="fas fa-arrow-right"></i></div>
+                    <button class="control-btn" id="prev-btn" disabled><i class="fas fa-arrow-left"></i> Previous</button>
+                    <button class="control-btn pulse" id="show-answer-btn">Show Answer <i class="fas fa-lightbulb"></i></button>
+                    <button class="control-btn" id="next-btn">Next <i class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
         </div>
@@ -367,59 +388,281 @@
     </div>
 
     <script>
-        // Sample JSON structure for a chapter
-        const sampleChapter = {
-            "chapter": "Physical World and Measurement",
-            "subject": "Physics",
-            "class": "11",
-            "questions": [
-                {
-                    "id": 1,
-                    "question": "Which of the following is the standard unit of measurement for energy in the International System of Units (SI)?",
-                    "options": ["Newton", "Joule", "Watt", "Pascal"],
-                    "correctAnswer": "Joule",
-                    "explanation": "The joule (J) is the derived unit of energy in the International System of Units. It is equal to the energy transferred to an object when a force of one newton acts on that object in the direction of the force through a distance of one meter."
+        // Sample JSON data for different subjects and chapters
+        const quizData = {
+            "physics": {
+                "physical-world": {
+                    "chapter": "Physical World and Measurement",
+                    "questions": [
+                        {
+                            "id": 1,
+                            "question": "Which of the following is the standard unit of measurement for energy in the International System of Units (SI)?",
+                            "options": ["Newton", "Joule", "Watt", "Pascal"],
+                            "correctAnswer": "Joule",
+                            "explanation": "The joule (J) is the derived unit of energy in the International System of Units. It is equal to the energy transferred to an object when a force of one newton acts on that object in the direction of the force through a distance of one meter."
+                        },
+                        {
+                            "id": 2,
+                            "question": "What is the SI unit of electric current?",
+                            "options": ["Volt", "Ampere", "Ohm", "Coulomb"],
+                            "correctAnswer": "Ampere",
+                            "explanation": "The ampere is the SI unit of electric current. It is defined by taking the fixed numerical value of the elementary charge e to be 1.602176634 × 10^{-19} when expressed in the unit C."
+                        },
+                        {
+                            "id": 3,
+                            "question": "Which instrument is used to measure atmospheric pressure?",
+                            "options": ["Barometer", "Thermometer", "Hygrometer", "Anemometer"],
+                            "correctAnswer": "Barometer",
+                            "explanation": "A barometer is a scientific instrument used to measure atmospheric pressure. Evangelista Torricelli invented the first barometer in 1643."
+                        }
+                    ]
                 },
-                {
-                    "id": 2,
-                    "question": "What is the SI unit of electric current?",
-                    "options": ["Volt", "Ampere", "Ohm", "Coulomb"],
-                    "correctAnswer": "Ampere",
-                    "explanation": "The ampere is the SI unit of electric current. It is defined by taking the fixed numerical value of the elementary charge e to be 1.602176634 × 10^{-19} when expressed in the unit C."
-                },
-                {
-                    "id": 3,
-                    "question": "Which instrument is used to measure atmospheric pressure?",
-                    "options": ["Barometer", "Thermometer", "Hygrometer", "Anemometer"],
-                    "correctAnswer": "Barometer",
-                    "explanation": "A barometer is a scientific instrument used to measure atmospheric pressure. Evangelista Torricelli invented the first barometer in 1643."
+                "kinematics": {
+                    "chapter": "Kinematics",
+                    "questions": [
+                        {
+                            "id": 1,
+                            "question": "Which of the following is a scalar quantity?",
+                            "options": ["Velocity", "Displacement", "Speed", "Acceleration"],
+                            "correctAnswer": "Speed",
+                            "explanation": "Speed is a scalar quantity as it has only magnitude and no direction. Velocity, displacement, and acceleration are vector quantities as they have both magnitude and direction."
+                        }
+                    ]
                 }
-            ]
+            },
+            "chemistry": {
+                "atomic-structure": {
+                    "chapter": "Atomic Structure",
+                    "questions": [
+                        {
+                            "id": 1,
+                            "question": "What is the maximum number of electrons that can occupy the p orbital?",
+                            "options": ["2", "6", "10", "14"],
+                            "correctAnswer": "6",
+                            "explanation": "The p orbital has 3 suborbitals, each capable of holding 2 electrons, for a total of 6 electrons."
+                        }
+                    ]
+                }
+            }
+        };
+
+        // Current state
+        let currentState = {
+            class: "11",
+            subject: "physics",
+            chapter: "physical-world",
+            currentQuestion: 0,
+            selectedOption: null
         };
 
         // DOM elements
+        const classButtons = document.querySelectorAll('.class-btn');
+        const subjectItems = document.querySelectorAll('.subject-list li');
+        const chapterItems = document.querySelectorAll('.chapter-list li');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const currentQuestionElement = document.getElementById('current-question');
+        const totalQuestionsElement = document.getElementById('total-questions');
+        const answerContainer = document.getElementById('answer-container');
+        const answerText = document.getElementById('answer-text');
         const showAnswerBtn = document.getElementById('show-answer-btn');
-        const answerContainer = document.querySelector('.answer-container');
-        const options = document.querySelectorAll('.option');
-        
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        // Initialize the quiz
+        function initQuiz() {
+            loadQuestions();
+            updateNavigation();
+            updateQuizInfo();
+        }
+
+        // Load questions based on current state
+        function loadQuestions() {
+            const { subject, chapter, currentQuestion } = currentState;
+            const questions = quizData[subject][chapter].questions;
+            
+            if (questions && questions.length > 0) {
+                const question = questions[currentQuestion];
+                questionText.textContent = question.question;
+                
+                // Clear options container
+                optionsContainer.innerHTML = '';
+                
+                // Add options
+                question.options.forEach(option => {
+                    const optionElement = document.createElement('div');
+                    optionElement.className = 'option';
+                    optionElement.textContent = option;
+                    optionElement.setAttribute('data-value', option);
+                    
+                    optionElement.addEventListener('click', () => {
+                        selectOption(optionElement, option);
+                    });
+                    
+                    optionsContainer.appendChild(optionElement);
+                });
+                
+                // Reset answer container
+                answerContainer.style.display = 'none';
+                showAnswerBtn.classList.add('pulse');
+                
+                // Reset selected option
+                currentState.selectedOption = null;
+            }
+        }
+
+        // Update navigation buttons
+        function updateNavigation() {
+            const { subject, chapter, currentQuestion } = currentState;
+            const questions = quizData[subject][chapter].questions;
+            
+            // Update previous button
+            prevBtn.disabled = currentQuestion === 0;
+            
+            // Update next button
+            nextBtn.disabled = currentQuestion === questions.length - 1;
+        }
+
+        // Update quiz information
+        function updateQuizInfo() {
+            const { subject, chapter, currentQuestion } = currentState;
+            const questions = quizData[subject][chapter].questions;
+            
+            currentQuestionElement.textContent = currentQuestion + 1;
+            totalQuestionsElement.textContent = questions.length;
+        }
+
+        // Handle option selection
+        function selectOption(optionElement, optionValue) {
+            // Remove selected class from all options
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            optionElement.classList.add('selected');
+            
+            // Update selected option
+            currentState.selectedOption = optionValue;
+        }
+
+        // Show answer
+        function showAnswer() {
+            const { subject, chapter, currentQuestion } = currentState;
+            const questions = quizData[subject][chapter].questions;
+            const question = questions[currentQuestion];
+            
+            answerText.textContent = `${question.correctAnswer}. ${question.explanation}`;
+            answerContainer.style.display = 'block';
+            showAnswerBtn.classList.remove('pulse');
+            
+            // Highlight correct and incorrect answers
+            document.querySelectorAll('.option').forEach(opt => {
+                if (opt.dataset.value === question.correctAnswer) {
+                    opt.classList.add('correct');
+                } else if (opt.classList.contains('selected') && opt.dataset.value !== question.correctAnswer) {
+                    opt.classList.add('incorrect');
+                }
+            });
+        }
+
+        // Navigate to next question
+        function nextQuestion() {
+            const { subject, chapter, currentQuestion } = currentState;
+            const questions = quizData[subject][chapter].questions;
+            
+            if (currentQuestion < questions.length - 1) {
+                currentState.currentQuestion++;
+                initQuiz();
+            }
+        }
+
+        // Navigate to previous question
+        function prevQuestion() {
+            if (currentState.currentQuestion > 0) {
+                currentState.currentQuestion--;
+                initQuiz();
+            }
+        }
+
+        // Change class
+        function changeClass(classValue) {
+            currentState.class = classValue;
+            
+            // Update UI
+            classButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.class === classValue);
+            });
+            
+            // Reset to first question
+            currentState.currentQuestion = 0;
+            initQuiz();
+        }
+
+        // Change subject
+        function changeSubject(subjectValue) {
+            currentState.subject = subjectValue;
+            
+            // Update UI
+            subjectItems.forEach(item => {
+                item.classList.toggle('active', item.dataset.subject === subjectValue);
+            });
+            
+            // Reset to first chapter and question
+            const firstChapter = document.querySelector('.chapter-list li').dataset.chapter;
+            currentState.chapter = firstChapter;
+            currentState.currentQuestion = 0;
+            
+            // Update chapter UI
+            chapterItems.forEach(item => {
+                item.classList.toggle('active', item.dataset.chapter === firstChapter);
+            });
+            
+            initQuiz();
+        }
+
+        // Change chapter
+        function changeChapter(chapterValue) {
+            currentState.chapter = chapterValue;
+            
+            // Update UI
+            chapterItems.forEach(item => {
+                item.classList.toggle('active', item.dataset.chapter === chapterValue);
+            });
+            
+            // Reset to first question
+            currentState.currentQuestion = 0;
+            initQuiz();
+        }
+
         // Event listeners
-        showAnswerBtn.addEventListener('click', function() {
-            answerContainer.style.display = answerContainer.style.display === 'block' ? 'none' : 'block';
-            this.classList.toggle('pulse');
-        });
-        
-        options.forEach(option => {
-            option.addEventListener('click', function() {
-                options.forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
+        showAnswerBtn.addEventListener('click', showAnswer);
+        nextBtn.addEventListener('click', nextQuestion);
+        prevBtn.addEventListener('click', prevQuestion);
+
+        // Class selection
+        classButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                changeClass(btn.dataset.class);
             });
         });
-        
-        // Simulate loading from JSON (in a real application, this would be fetched from the server)
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Sample Chapter JSON:', sampleChapter);
-            // In a real app, we would load the questions from the selected chapter JSON file
+
+        // Subject selection
+        subjectItems.forEach(item => {
+            item.addEventListener('click', () => {
+                changeSubject(item.dataset.subject);
+            });
         });
+
+        // Chapter selection
+        chapterItems.forEach(item => {
+            item.addEventListener('click', () => {
+                changeChapter(item.dataset.chapter);
+            });
+        });
+
+        // Initialize the quiz on page load
+        document.addEventListener('DOMContentLoaded', initQuiz);
     </script>
 </body>
 </html>
